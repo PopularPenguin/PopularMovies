@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">PopularMovies</string>
 
+    <!-- Error messages -->
+    <string name="error_connectivity">No Internet connnectivity found</string>
+
     <!-- ListActivity menu -->
     <string name="menu_popularity">Sort by Popularity</string>
     <string name="menu_rating">Sort by Rating</string>

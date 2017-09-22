@@ -1,59 +1,84 @@
 package com.popularpenguin.popularmovies;
 
 import android.content.Context;
-import android.graphics.Movie;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.ImageView;
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder>{
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+
+public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
     private static final String TAG = MovieAdapter.class.getSimpleName();
 
-    private Context ctx;
-    private int mViewCount; // number of total views created
+    private static final String INTENT_EXTRA = "movie";
 
-    public MovieAdapter(Context ctx) {
+    private final MovieAdapterOnClickHandler mClickHandler;
+
+    public interface MovieAdapterOnClickHandler {
+        void onClick(Movie m);
+    }
+
+    private Context ctx;
+    private ArrayList<Movie> mMovieList;
+
+    public MovieAdapter(Context ctx, ArrayList<Movie> movieList,
+                        MovieAdapterOnClickHandler handler) {
+
         this.ctx = ctx;
+        mMovieList = movieList;
+        mClickHandler = handler;
     }
 
     @Override
-    public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MovieAdapter.MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        mViewCount++; // added another view
+        int layout = R.layout.movie_item;
+        LayoutInflater inflater = LayoutInflater.from(ctx);
 
-        return null;
+        View view = inflater.inflate(layout, parent, false);
+        MovieViewHolder viewHolder = new MovieViewHolder(view);
+
+        return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
-        holder.bind(position);
+        Movie movie = mMovieList.get(position);
+
+        holder.bind(movie.getPosterPath());
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mMovieList.size();
     }
 
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        ImageView imageView; // the image for the movie poster
+
         public MovieViewHolder(View itemView) {
             super(itemView);
 
-            // TODO: Set image id findViewById here
-            // ...
+            imageView = (ImageView) itemView.findViewById(R.id.iv_movie);
 
             itemView.setOnClickListener(this);
         }
 
-        void bind(int listIndex) {
-            // TODO: Set image for the ViewHolder here
+        void bind(String posterPath) {
+            // Set image for the ViewHolder here
+            Picasso.with(ctx).load(posterPath).into(imageView);
         }
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(ctx, "Go to detail activity", Toast.LENGTH_SHORT).show();
+            mClickHandler.onClick(mMovieList.get(getAdapterPosition()));
         }
     }
 }
