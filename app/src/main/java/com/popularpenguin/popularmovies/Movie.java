@@ -62,12 +62,12 @@ public class Movie implements Parcelable {
     public String getPosterPath() { return mPosterPath; }
     public void setPosterPath(String path) { mPosterPath = path; }
 
-    public String getReleaseDate() { return mReleaseDate; }
+    public String getReleaseDate() { return mReleaseDate.substring(0, 4); }
     public void setReleaseDate(String date) { mReleaseDate = date; }
 
     public String getOverview() { return mOverview; }
     public void setOverview(String overview) { mOverview = overview; }
 
-    public double getAverage() { return mAverage; }
+    public String getAverage() { return mAverage + "/10"; }
     public void setAverage(double average) { mAverage = average; }
 }

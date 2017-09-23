@@ -26,6 +26,7 @@ public class ListActivity extends AppCompatActivity implements
     private static final String TAG = ListActivity.class.getSimpleName();
 
     private static final String MOVIE_LIST_KEY = "movie_list";
+    private static final String POPULAR_KEY = "popular";
 
     private final String INTENT_EXTRA_MOVIE = "movie";
     private final String INTENT_EXTRA_LIST = "movies";
@@ -48,37 +49,29 @@ public class ListActivity extends AppCompatActivity implements
 
         mMovieList = new ArrayList<>();
 
-        // Check if there is data in savedInstanceState,
-        // if not check the network connection and download the movie data
+        // Check if there is data in savedInstanceState, if not download the movie data
         if (savedInstanceState != null) {
-            Toast.makeText(this, "Getting saved data", Toast.LENGTH_SHORT).show();
             mMovieList = savedInstanceState.getParcelableArrayList(MOVIE_LIST_KEY);
+            mPopularIsSelected = savedInstanceState.getBoolean(POPULAR_KEY);
             setUpRecyclerView();
         }
         else {
-            // Check if there is an active network connection
-            ConnectivityManager cm =
-                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo info = cm.getActiveNetworkInfo();
-            boolean isConnected = info != null && info.isConnectedOrConnecting();
-
-            if (isConnected) {
-                Toast.makeText(this, "Downloading data", Toast.LENGTH_SHORT).show();
-                new GetMovies(mPopularIsSelected).execute();
-            }
-            else {
-                Toast.makeText(this, R.string.error_connectivity, Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(this, R.string.con_downloading, Toast.LENGTH_SHORT).show();
+            new GetMovies(mPopularIsSelected).execute();
         }
     }
 
-    /** Save the entire movie array so you don't have to refetch it if the view is recreated */
+    /** Save the entire movie array so you don't have to refetch it if the view is recreated
+     * and save the position of the menu checked item */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(MOVIE_LIST_KEY, mMovieList);
+        outState.putBoolean(POPULAR_KEY, mPopularIsSelected);
         super.onSaveInstanceState(outState);
     }
 
+    /** Receive the movie list back from the intent so you don't have to requery the data
+     * from the network */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
@@ -93,6 +86,15 @@ public class ListActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_list, menu);
+
+        // set the menu item checked
+        // NOTE: If the menu order is changed, the indexes here will have to change too
+        if (mPopularIsSelected) {
+            menu.getItem(0).setChecked(true);
+        }
+        else {
+            menu.getItem(1).setChecked(true);
+        }
 
         return true;
     }
@@ -158,7 +160,6 @@ public class ListActivity extends AppCompatActivity implements
 
             case Surface.ROTATION_90:
             case Surface.ROTATION_270:
-                // TODO: Change to a grid layout?
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
                 break;
 
@@ -194,7 +195,7 @@ public class ListActivity extends AppCompatActivity implements
 
         @Override
         protected ArrayList<Movie> doInBackground(String... params) {
-            return getMovies(isPopularSelected);
+            return getMovies(ListActivity.this, isPopularSelected);
         }
 
         @Override

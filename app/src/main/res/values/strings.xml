@@ -4,8 +4,13 @@
     <!-- Error messages -->
     <string name="error_connectivity">No Internet connnectivity found</string>
 
+    <!-- Connectivitity messages -->
+    <string name="con_downloading">Downloading data</string>
+
     <!-- ListActivity menu -->
     <string name="menu_popularity">Sort by Popularity</string>
     <string name="menu_rating">Sort by Rating</string>
+
+
 
 </resources>

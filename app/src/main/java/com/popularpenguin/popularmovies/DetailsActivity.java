@@ -3,12 +3,13 @@ package com.popularpenguin.popularmovies;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import static com.popularpenguin.popularmovies.BuildConfig.MOVIE_API_KEY;
+import com.squareup.picasso.Picasso;
 
 public class DetailsActivity extends AppCompatActivity {
 
@@ -18,29 +19,39 @@ public class DetailsActivity extends AppCompatActivity {
 
     private Movie mMovie;
 
-    private TextView testText;
+    private TextView mTitleText;
+    private TextView mReleaseDateText;
+    private TextView mRating;
+    private TextView mOverview;
+    private ImageView mPosterImage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-        testText = (TextView) findViewById(R.id.tv_test);
+        mTitleText = (TextView) findViewById(R.id.tv_title);
+        mReleaseDateText = (TextView) findViewById(R.id.tv_release_date);
+        mRating = (TextView) findViewById(R.id.tv_rating);
+        mOverview = (TextView) findViewById(R.id.tv_overview);
+        mPosterImage = (ImageView) findViewById(R.id.iv_details_poster);
 
         Intent intent = getIntent();
 
-        // TODO: Remove this TextView once the layout is set up
         if (intent.hasExtra(INTENT_EXTRA_MOVIE)) {
             mMovie = intent.getParcelableExtra(INTENT_EXTRA_MOVIE);
-            testText.append("Title: " + mMovie.getTitle());
-            testText.append("\nDate: " + mMovie.getReleaseDate());
-            testText.append("\nUser Average: " + mMovie.getAverage());
-            testText.append("\nOverview: " + mMovie.getOverview());
-        }
 
-        // TODO: Add a ConstraintLayout
+            mTitleText.setText(mMovie.getTitle());
+            mReleaseDateText.setText(mMovie.getReleaseDate());
+            mRating.setText(mMovie.getAverage());
+            mOverview.setText(mMovie.getOverview());
+
+            Picasso.with(this).load(mMovie.getPosterPath()).into(mPosterImage);
+        }
     }
 
+    /** Stop up button from creating a new instance of the parent activity so it doesn't
+     * fetch the data again */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

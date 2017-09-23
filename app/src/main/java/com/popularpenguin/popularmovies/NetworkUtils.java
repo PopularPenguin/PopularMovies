@@ -1,12 +1,15 @@
 package com.popularpenguin.popularmovies;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -30,7 +33,12 @@ public class NetworkUtils {
     private static final String IMG_URL = BASE_IMG_URL + DEFAULT_WIDTH;
 
     /** public method to fetch the movies as an ArrayList */
-    public static ArrayList<Movie> getMovies(boolean isPopular) {
+    public static ArrayList<Movie> getMovies(Context ctx, boolean isPopular) {
+        // Check for a network connection
+        if (!isConnected(ctx)) {
+            return new ArrayList<>();
+        }
+
         ArrayList<Movie> movieList = null;
         String url = isPopular ? POPULAR_URL : TOP_RATED_URL;
 
@@ -79,5 +87,15 @@ public class NetworkUtils {
         }
 
         return movieList;
+    }
+
+    /** Check for a network connection before downloading data */
+    private static boolean isConnected(Context ctx) {
+        // Check if there is an active network connection
+        ConnectivityManager cm =
+                (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+
+        return info != null && info.isConnectedOrConnecting();
     }
 }
