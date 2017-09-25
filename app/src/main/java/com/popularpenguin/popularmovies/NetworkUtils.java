@@ -61,7 +61,8 @@ class NetworkUtils {
         return info != null && info.isConnectedOrConnecting();
     }
 
-    /** Request the JSON from the server and return it as a String */
+    /** Request the JSON from the server and return it as a String
+     * This code was taken from the OKHTTP main page*/
     private static String getJson(String url) throws IOException {
         OkHttpClient client = new OkHttpClient();
 
