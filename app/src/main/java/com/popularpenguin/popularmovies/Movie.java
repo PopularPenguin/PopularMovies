@@ -3,6 +3,7 @@ package com.popularpenguin.popularmovies;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+@SuppressWarnings("unused")
 public class Movie implements Parcelable {
     private String mTitle;
     private String mPosterPath;

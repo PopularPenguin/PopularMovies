@@ -1,9 +1,6 @@
 package com.popularpenguin.popularmovies;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +17,7 @@ import java.util.ArrayList;
 
 import static com.popularpenguin.popularmovies.NetworkUtils.getMovies;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class ListActivity extends AppCompatActivity implements
         MovieAdapter.MovieAdapterOnClickHandler {
 
@@ -29,8 +27,6 @@ public class ListActivity extends AppCompatActivity implements
     private static final String POPULAR_KEY = "popular";
 
     private final String INTENT_EXTRA_MOVIE = "movie";
-    private final String INTENT_EXTRA_LIST = "movies";
-    private final int REQUEST_CODE = 1;
 
     private MovieAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -38,7 +34,7 @@ public class ListActivity extends AppCompatActivity implements
 
     private ArrayList<Movie> mMovieList;
 
-    boolean mPopularIsSelected = true;
+    private boolean mPopularIsSelected = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,30 +52,17 @@ public class ListActivity extends AppCompatActivity implements
             setUpRecyclerView();
         }
         else {
-            Toast.makeText(this, R.string.con_downloading, Toast.LENGTH_SHORT).show();
             new GetMovies(mPopularIsSelected).execute();
         }
     }
 
-    /** Save the entire movie array so you don't have to refetch it if the view is recreated
+    /** Save the entire movie array so you don't have to fetch it if the view is recreated
      * and save the position of the menu checked item */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(MOVIE_LIST_KEY, mMovieList);
         outState.putBoolean(POPULAR_KEY, mPopularIsSelected);
         super.onSaveInstanceState(outState);
-    }
-
-    /** Receive the movie list back from the intent so you don't have to requery the data
-     * from the network */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            if (data.hasExtra(INTENT_EXTRA_LIST)) {
-                Toast.makeText(this, "Activity returned", Toast.LENGTH_SHORT).show();
-                mMovieList = data.getParcelableArrayListExtra(INTENT_EXTRA_LIST);
-            }
-        }
     }
 
     /** Create the menu */
@@ -99,35 +82,31 @@ public class ListActivity extends AppCompatActivity implements
         return true;
     }
 
-    /** Menu options to sort by popularity or rating, fatch new data when changing options */
+    /** Menu options to sort by popularity or rating, fetch new data when changing options */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (!NetworkUtils.isConnected(this)) {
+            Toast.makeText(this, R.string.con_error, Toast.LENGTH_SHORT).show();
+            return false;
+        }
 
         int itemId = item.getItemId();
 
         switch (itemId) {
 
             case R.id.action_sort_popular:
-                if (item.isChecked()) break;
-
-                Toast.makeText(this, "Sort by Popularity", Toast.LENGTH_SHORT).show();
-
                 item.setChecked(true);
 
                 mPopularIsSelected = true;
-                new GetMovies(mPopularIsSelected).execute();
+                new GetMovies(true).execute();
 
                 break;
 
             case R.id.action_sort_rating:
-                if (item.isChecked()) break;
-
-                Toast.makeText(this, "Sort by Rating", Toast.LENGTH_SHORT).show();
-
                 item.setChecked(true);
 
                 mPopularIsSelected = false;
-                new GetMovies(mPopularIsSelected).execute();
+                new GetMovies(false).execute();
 
                 break;
 
@@ -141,8 +120,6 @@ public class ListActivity extends AppCompatActivity implements
     /** Set up the RecyclerView, setting the LayoutManager to a grid if the orientation is
      * in portrait and a horizontal LinearLayout if the orientation is in landscape */
     private void setUpRecyclerView() {
-        Log.d(TAG, "setUpRecyclerView");
-
         mAdapter = new MovieAdapter(this, mMovieList, this);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -176,18 +153,15 @@ public class ListActivity extends AppCompatActivity implements
     @Override
     public void onClick(Movie movie) {
         Intent intent = new Intent(this, DetailsActivity.class);
-
         intent.putExtra(INTENT_EXTRA_MOVIE, movie);
-        intent.putParcelableArrayListExtra(INTENT_EXTRA_LIST, mMovieList);
 
-        startActivityForResult(intent, REQUEST_CODE);
+        startActivity(intent);
     }
-
 
     /** Async task for fetching the list of movies from the web API */
     private class GetMovies extends AsyncTask<String, Void, ArrayList<Movie>> {
 
-        private boolean isPopularSelected;
+        private final boolean isPopularSelected;
 
         public GetMovies(boolean isPopularSelected) {
             this.isPopularSelected = isPopularSelected;
@@ -200,6 +174,11 @@ public class ListActivity extends AppCompatActivity implements
 
         @Override
         protected void onPostExecute(ArrayList<Movie> result) {
+            if (result == null || result.isEmpty()) {
+                Toast.makeText(ListActivity.this, R.string.con_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             mMovieList = result;
 
             setUpRecyclerView();

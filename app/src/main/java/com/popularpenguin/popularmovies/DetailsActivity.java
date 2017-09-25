@@ -2,8 +2,6 @@ package com.popularpenguin.popularmovies;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -11,6 +9,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class DetailsActivity extends AppCompatActivity {
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
@@ -26,7 +25,7 @@ public class DetailsActivity extends AppCompatActivity {
     private ImageView mPosterImage;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 

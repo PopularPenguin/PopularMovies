@@ -11,11 +11,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("unused")
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
     private static final String TAG = MovieAdapter.class.getSimpleName();
-
-    private static final String INTENT_EXTRA = "movie";
 
     private final MovieAdapterOnClickHandler mClickHandler;
 
@@ -23,8 +22,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         void onClick(Movie m);
     }
 
-    private Context ctx;
-    private ArrayList<Movie> mMovieList;
+    private final Context ctx;
+    private final ArrayList<Movie> mMovieList;
 
     public MovieAdapter(Context ctx, ArrayList<Movie> movieList,
                         MovieAdapterOnClickHandler handler) {
@@ -41,9 +40,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         LayoutInflater inflater = LayoutInflater.from(ctx);
 
         View view = inflater.inflate(layout, parent, false);
-        MovieViewHolder viewHolder = new MovieViewHolder(view);
 
-        return viewHolder;
+        return new MovieViewHolder(view);
     }
 
     @Override
@@ -58,9 +56,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return mMovieList.size();
     }
 
+    /** The view holder to hold a movie poster */
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        ImageView imageView; // the image for the movie poster
+        final ImageView imageView; // the image for the movie poster
 
         public MovieViewHolder(View itemView) {
             super(itemView);

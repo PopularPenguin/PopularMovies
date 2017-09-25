@@ -17,9 +17,8 @@ import okhttp3.Response;
 
 import static com.popularpenguin.popularmovies.BuildConfig.MOVIE_API_KEY;
 
-public class NetworkUtils {
-
-    // TODO: Switch later to a Uri Builder?
+@SuppressWarnings("unused")
+class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
@@ -50,6 +49,16 @@ public class NetworkUtils {
         }
 
         return movieList;
+    }
+
+    /** Check for a network connection before downloading data */
+    public static boolean isConnected(Context ctx) {
+        // Check if there is an active network connection
+        ConnectivityManager cm =
+                (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+
+        return info != null && info.isConnectedOrConnecting();
     }
 
     /** Request the JSON from the server and return it as a String */
@@ -87,15 +96,5 @@ public class NetworkUtils {
         }
 
         return movieList;
-    }
-
-    /** Check for a network connection before downloading data */
-    private static boolean isConnected(Context ctx) {
-        // Check if there is an active network connection
-        ConnectivityManager cm =
-                (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-
-        return info != null && info.isConnectedOrConnecting();
     }
 }
