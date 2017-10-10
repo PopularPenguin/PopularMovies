@@ -1,8 +1,10 @@
-package com.popularpenguin.popularmovies;
+package com.popularpenguin.popularmovies.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import com.popularpenguin.popularmovies.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,7 +20,7 @@ import okhttp3.Response;
 import static com.popularpenguin.popularmovies.BuildConfig.MOVIE_API_KEY;
 
 @SuppressWarnings("unused")
-class NetworkUtils {
+public class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
 

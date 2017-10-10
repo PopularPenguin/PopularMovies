@@ -1,7 +1,8 @@
 package com.popularpenguin.popularmovies;
 
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,13 +14,15 @@ import android.view.MenuItem;
 import android.view.Surface;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.popularpenguin.popularmovies.utils.MovieLoader;
+import com.popularpenguin.popularmovies.utils.NetworkUtils;
 
-import static com.popularpenguin.popularmovies.NetworkUtils.getMovies;
+import java.util.ArrayList;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class ListActivity extends AppCompatActivity implements
-        MovieAdapter.MovieAdapterOnClickHandler {
+        MovieAdapter.MovieAdapterOnClickHandler,
+        LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
 
     private static final String TAG = ListActivity.class.getSimpleName();
 
@@ -27,6 +30,8 @@ public class ListActivity extends AppCompatActivity implements
     private static final String POPULAR_KEY = "popular";
 
     private final String INTENT_EXTRA_MOVIE = "movie";
+
+    public static final int LIST_LOADER_ID = 1;
 
     private MovieAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -52,7 +57,8 @@ public class ListActivity extends AppCompatActivity implements
             setUpRecyclerView();
         }
         else {
-            new GetMovies(mPopularIsSelected).execute();
+            // if there is no saved state, initialize the loader
+            getSupportLoaderManager().initLoader(LIST_LOADER_ID, null, this);
         }
     }
 
@@ -98,7 +104,7 @@ public class ListActivity extends AppCompatActivity implements
                 item.setChecked(true);
 
                 mPopularIsSelected = true;
-                new GetMovies(true).execute();
+                getSupportLoaderManager().restartLoader(LIST_LOADER_ID, null, this);
 
                 break;
 
@@ -106,7 +112,7 @@ public class ListActivity extends AppCompatActivity implements
                 item.setChecked(true);
 
                 mPopularIsSelected = false;
-                new GetMovies(false).execute();
+                getSupportLoaderManager().restartLoader(LIST_LOADER_ID, null, this);
 
                 break;
 
@@ -137,7 +143,8 @@ public class ListActivity extends AppCompatActivity implements
 
             case Surface.ROTATION_90:
             case Surface.ROTATION_270:
-                mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                mLayoutManager = new GridLayoutManager(this, 1 /* columns */,
+                        LinearLayoutManager.HORIZONTAL, false);
                 break;
 
             default:
@@ -158,30 +165,31 @@ public class ListActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    /** Async task for fetching the list of movies from the web API */
-    private class GetMovies extends AsyncTask<String, Void, ArrayList<Movie>> {
+    /** Loader callbacks */
+    @Override
+    public Loader<ArrayList<Movie>> onCreateLoader(int id, final Bundle args) {
+        if (id == LIST_LOADER_ID) {
+            return new MovieLoader(this, mPopularIsSelected);
+        }
+        else {
+            throw new IllegalArgumentException("Invalid loader id");
+        }
+    }
 
-        private final boolean isPopularSelected;
-
-        public GetMovies(boolean isPopularSelected) {
-            this.isPopularSelected = isPopularSelected;
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> result) {
+        if (result == null || result.isEmpty()) {
+            Toast.makeText(ListActivity.this, R.string.con_error, Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        @Override
-        protected ArrayList<Movie> doInBackground(String... params) {
-            return getMovies(ListActivity.this, isPopularSelected);
-        }
+        mMovieList = result;
 
-        @Override
-        protected void onPostExecute(ArrayList<Movie> result) {
-            if (result == null || result.isEmpty()) {
-                Toast.makeText(ListActivity.this, R.string.con_error, Toast.LENGTH_SHORT).show();
-                return;
-            }
+        setUpRecyclerView();
+    }
 
-            mMovieList = result;
-
-            setUpRecyclerView();
-        }
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
+        // Not implemented
     }
 }
