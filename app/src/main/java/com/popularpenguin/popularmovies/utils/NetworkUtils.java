@@ -4,7 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.popularpenguin.popularmovies.Movie;
+import com.popularpenguin.popularmovies.data.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,10 +24,12 @@ public class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
-    private static final String POPULAR_URL =
-            "http://api.themoviedb.org/3/movie/popular?api_key=" + MOVIE_API_KEY;
-    private static final String TOP_RATED_URL =
-            "http://api.themoviedb.org/3/movie/top_rated?api_key=" + MOVIE_API_KEY;
+    private static final String BASE_URL = "http://api.themoviedb.org/3/movie/";
+
+    private static final String POPULAR_URL = BASE_URL + "popular?api_key=" + MOVIE_API_KEY;
+    private static final String TOP_RATED_URL = BASE_URL + "top_rated?api_key=" + MOVIE_API_KEY;
+    // Movie videos is /movie/{id}/videos
+    // Movie reviews is /movie/{id}/reviews
 
     private static final String BASE_IMG_URL = "https://image.tmdb.org/t/p/";
     private static final String DEFAULT_WIDTH = "w185/";
@@ -44,7 +46,7 @@ public class NetworkUtils {
         String url = isPopular ? POPULAR_URL : TOP_RATED_URL;
 
         try {
-            movieList = parseJsonIntoList(getJson(url));
+            movieList = parseMovieJSON(getJson(url));
         }
         catch (IOException | JSONException e) {
             e.printStackTrace();
@@ -63,6 +65,55 @@ public class NetworkUtils {
         return info != null && info.isConnectedOrConnecting();
     }
 
+    /** Get the trailers and add them to the movie object passed in to this method
+     * This method should be called from the detail activity
+     * @param ctx The context from the detail activity
+     * @param id The id of the movie that the detail activity is displaying (from movie.getId())
+     * */
+    public static ArrayList<String[]> getTrailers(Context ctx, int id) {
+        ArrayList<String[]> trailerList = new ArrayList<>();
+
+        // if there is no connection, just return an empty list
+        if (!isConnected(ctx)) return trailerList;
+
+        // Movie videos endpoint is /movie/{id}/videos
+        String urlString = BASE_URL + id + "/videos?api_key=" + MOVIE_API_KEY;
+
+        try {
+            trailerList = parseTrailerJSON(getJson(urlString));
+        }
+        catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return trailerList;
+    }
+
+    /** Get the reviews and add them to the movie object passed in to this method
+     * this method should be called from the detail activity
+     * @param ctx The context from the detail activity
+     * @param id The id of the movie that the detail activity is displaying (from movie.getId())
+     * */
+    public static ArrayList<String[]> getReviews(Context ctx, int id) {
+        ArrayList<String[]> reviewList = new ArrayList<>();
+
+        // if there is no connection, just return an empty list
+        if (!isConnected(ctx)) return reviewList;
+
+        // Movie reviews endpoint is /movie/{id}/reviews
+        String urlString = BASE_URL + id + "/reviews?api_key=" + MOVIE_API_KEY;
+
+        try {
+            reviewList = parseReviewJSON(getJson(urlString));
+        }
+        catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return reviewList;
+    }
+
+
     /** Request the JSON from the server and return it as a String
      * This code was taken from the OKHTTP main page*/
     private static String getJson(String url) throws IOException {
@@ -78,7 +129,7 @@ public class NetworkUtils {
     }
 
     /** Parse the JSON String into an ArrayList of Movie objects */
-    private static ArrayList<Movie> parseJsonIntoList(String jsonString) throws JSONException {
+    private static ArrayList<Movie> parseMovieJSON(String jsonString) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonString);
 
         JSONArray results = jsonObject.getJSONArray("results");
@@ -88,16 +139,66 @@ public class NetworkUtils {
         for (int i = 0; i < results.length(); i++) {
             JSONObject movieData = results.getJSONObject(i);
 
+            int id = movieData.getInt("id");
             String title = movieData.getString("title");
             String posterPath = IMG_URL + movieData.getString("poster_path");
             String releaseDate = movieData.getString("release_date");
             String overview = movieData.getString("overview");
             double average = movieData.getDouble("vote_average");
 
-            Movie movie = new Movie(title, posterPath, releaseDate, overview, average);
+            Movie movie = new Movie(id, title, posterPath, releaseDate, overview, average);
             movieList.add(movie);
         }
 
         return movieList;
+    }
+
+    /** Parse the JSON String for trailers and return the data */
+    private static ArrayList<String[]> parseTrailerJSON(String jsonString)
+            throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(jsonString);
+
+        JSONArray results = jsonObject.getJSONArray("results");
+        int size = results.length();
+
+        String[] keys = new String[size];
+        String[] names = new String[size];
+
+        for (int i = 0; i < results.length(); i++) {
+            keys[i] = results.getJSONObject(i).getString("key");
+            names[i] = results.getJSONObject(i).getString("name");
+        }
+
+        ArrayList<String[]> trailerList = new ArrayList<>();
+        trailerList.add(keys);
+        trailerList.add(names);
+
+        return trailerList;
+    }
+
+    /** Parse the JSON String for reviews and add the data to the movie */
+    private static ArrayList<String[]> parseReviewJSON(String jsonString) throws JSONException {
+        JSONObject jsonObject = new JSONObject(jsonString);
+
+        JSONArray results = jsonObject.getJSONArray("results");
+        int size = results.length();
+
+        String[] authors = new String[size];
+        String[] content = new String[size];
+        String[] urls = new String[size];
+
+        for (int i = 0; i < results.length(); i++) {
+            authors[i] = results.getJSONObject(i).getString("author");
+            content[i] = results.getJSONObject(i).getString("content");
+            urls[i] = results.getJSONObject(i).getString("url");
+        }
+
+        ArrayList<String[]> reviewList = new ArrayList<>();
+        reviewList.add(authors);
+        reviewList.add(content);
+        reviewList.add(urls);
+
+        return reviewList;
     }
 }

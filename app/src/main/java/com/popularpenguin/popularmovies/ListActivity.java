@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.view.Surface;
 import android.widget.Toast;
 
+import com.popularpenguin.popularmovies.data.Movie;
+import com.popularpenguin.popularmovies.utils.MovieAdapter;
 import com.popularpenguin.popularmovies.utils.MovieLoader;
 import com.popularpenguin.popularmovies.utils.NetworkUtils;
 

@@ -1,4 +1,4 @@
-package com.popularpenguin.popularmovies;
+package com.popularpenguin.popularmovies.utils;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.popularpenguin.popularmovies.data.Movie;
+import com.popularpenguin.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

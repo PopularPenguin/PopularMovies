@@ -11,5 +11,8 @@
     <!-- Detail Activity -->
     <string name="movie_info">Movie Info</string>
     <string name="overview">Overview</string>
+    <string name="trailers">Trailers:</string>
+
+    <string name="button_favorites">MARK AS FAVORITE</string>
 
 </resources>

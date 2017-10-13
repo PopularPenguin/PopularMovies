@@ -4,7 +4,7 @@ package com.popularpenguin.popularmovies.utils;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.popularpenguin.popularmovies.Movie;
+import com.popularpenguin.popularmovies.data.Movie;
 
 import java.util.ArrayList;
 
