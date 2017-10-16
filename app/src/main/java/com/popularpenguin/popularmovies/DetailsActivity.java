@@ -1,19 +1,23 @@
 package com.popularpenguin.popularmovies;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.popularpenguin.popularmovies.data.Movie;
+import com.popularpenguin.popularmovies.utils.ReviewsAdapter;
+import com.popularpenguin.popularmovies.utils.TrailersAdapter;
 import com.popularpenguin.popularmovies.utils.ReviewsLoader;
 import com.popularpenguin.popularmovies.utils.TrailersLoader;
 import com.squareup.picasso.Picasso;
@@ -23,7 +27,8 @@ import java.util.ArrayList;
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class DetailsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<ArrayList<String[]>>,
-        View.OnClickListener {
+        TrailersAdapter.DetailsAdapterOnClickHandler,
+        ReviewsAdapter.ReviewsAdapterOnClickHandler {
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
@@ -41,6 +46,13 @@ public class DetailsActivity extends AppCompatActivity implements
 
     private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
 
+    private TrailersAdapter mTrailersAdapter;
+    private ReviewsAdapter mReviewsAdapter;
+    private RecyclerView mTrailersRecyclerView;
+    private RecyclerView mReviewsRecyclerView;
+    private RecyclerView.LayoutManager mTrailersLayoutManager;
+    private RecyclerView.LayoutManager mReviewsLayoutManager;
+
     private Movie mMovie;
 
     private TextView mTitleText;
@@ -48,6 +60,7 @@ public class DetailsActivity extends AppCompatActivity implements
     private TextView mRating;
     private TextView mOverview;
     private ImageView mPosterImage;
+    private Button mFavoritesButton;
 
     // Trailer views
     private ImageView mPlayImage;
@@ -59,20 +72,26 @@ public class DetailsActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        mTrailersRecyclerView = (RecyclerView) findViewById(R.id.rv_trailers);
+        mReviewsRecyclerView = (RecyclerView) findViewById(R.id.rv_reviews);
+
         // TODO: Data binding?
         mTitleText = (TextView) findViewById(R.id.tv_title);
         mReleaseDateText = (TextView) findViewById(R.id.tv_release_date);
         mRating = (TextView) findViewById(R.id.tv_rating);
         mOverview = (TextView) findViewById(R.id.tv_overview);
         mPosterImage = (ImageView) findViewById(R.id.iv_details_poster);
+        mFavoritesButton = (Button) findViewById(R.id.btn_favorites);
 
-        mPlayImage = (ImageView) findViewById(R.id.iv_play_trailer);
-        mTrailerText = (TextView) findViewById(R.id.tv_trailer_1);
+        // TODO: Add db functionality for button
+        mFavoritesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(DetailsActivity.this, "Favorites clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // TODO: Use a URI builder instead
-        // TODO: Make a RecyclerView for trailers and pass in the index of the view to the key index
-        mPlayImage.setOnClickListener(this);
-        mTrailerText.setOnClickListener(this);
 
         Intent intent = getIntent();
 
@@ -112,7 +131,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 return new ReviewsLoader(this, mMovie.getId());
 
             default:
-                throw new IllegalArgumentException("Invalid loader id");
+                throw new UnsupportedOperationException("Invalid loader id");
         }
     }
 
@@ -123,8 +142,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 mMovie.setTrailerKeys(data.get(TRAILER_KEYS_INDEX));
                 mMovie.setTrailerNames(data.get(TRAILER_NAMES_INDEX));
 
-                // TODO: Remove this when the RecyclerView is set up
-                mTrailerText.setText(mMovie.getTrailerNames()[0]);
+                getSupportLoaderManager().initLoader(REVIEW_LOADER_ID, null, this);
 
                 break;
 
@@ -132,10 +150,15 @@ public class DetailsActivity extends AppCompatActivity implements
                 mMovie.setReviewAuthors(data.get(REVIEW_AUTHORS_INDEX));
                 mMovie.setReviewContent(data.get(REVIEW_CONTENT_INDEX));
                 mMovie.setReviewUrls(data.get(REVIEW_URLS_INDEX));
+
+                //Toast.makeText(this, String.valueOf(mMovie.getReviewAuthors().length), Toast.LENGTH_SHORT).show();
+
+                setUpRecyclerView();
+
                 break;
 
             default:
-                throw new IllegalArgumentException("Invalid loader id in onLoadFinished()");
+                throw new UnsupportedOperationException("Invalid loader id in onLoadFinished()");
         }
     }
 
@@ -144,29 +167,8 @@ public class DetailsActivity extends AppCompatActivity implements
         // Not implemented
     }
 
-    // TODO: Remove the playtrailer part when the RecyclerView is set up
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.iv_play_trailer:
-            case R.id.tv_trailer_1:
-                playTrailer();
-
-                break;
-
-            default:
-                throw new UnsupportedOperationException("Invalid view id");
-        }
-    }
-
-    private void playTrailer() {
-        if (mMovie.getTrailerKeys() == null) {
-            Toast.makeText(DetailsActivity.this, "Trailer data is null", Toast.LENGTH_SHORT)
-                    .show();
-
-            return;
-        }
-        String key = mMovie.getTrailerKeys()[0];
+    private void playTrailer(int position) {
+        String key = mMovie.getTrailerKeys()[position];
 
         if (key == null || key.equals("")) return;
 
@@ -177,4 +179,38 @@ public class DetailsActivity extends AppCompatActivity implements
             startActivity(playVideoIntent);
         }
     }
+
+    private void openReviewInBrowser(int position) {
+        String url = mMovie.getReviewUrls()[position];
+
+        if (url == null || url.equals("")) return;
+
+        Intent openReviewIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        if (openReviewIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(openReviewIntent);
+        }
+    }
+
+    /** Only call this after the data is loaded! */
+    private void setUpRecyclerView() {
+        mTrailersAdapter = new TrailersAdapter(this, mMovie, this);
+        mReviewsAdapter = new ReviewsAdapter(this, mMovie, this);
+        mTrailersLayoutManager = new LinearLayoutManager(this);
+        mReviewsLayoutManager = new LinearLayoutManager(this);
+
+        mTrailersRecyclerView.setAdapter(mTrailersAdapter);
+        mTrailersRecyclerView.setLayoutManager(mTrailersLayoutManager);
+        mTrailersRecyclerView.setHasFixedSize(true);
+
+        mReviewsRecyclerView.setAdapter(mReviewsAdapter);
+        mReviewsRecyclerView.setLayoutManager(mReviewsLayoutManager);
+        mReviewsRecyclerView.setHasFixedSize(true);
+    }
+
+    // TODO: Fix listener to work!
+    @Override
+    public void onClickTrailer(int position) { playTrailer(position); }
+
+    @Override
+    public void onClickReview(int position) { openReviewInBrowser(position); }
 }
