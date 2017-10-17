@@ -4,15 +4,19 @@
     <!-- Connectivity messages -->
     <string name="con_error">Unable to connect to themoviedb.org</string>
 
+    <!-- Favorites -->
+    <string name="fav_empty">No favorite movies available</string>
+
     <!-- ListActivity menu -->
     <string name="menu_popularity">Sort by Popularity</string>
     <string name="menu_rating">Sort by Rating</string>
+    <string name="menu_favorites">Show Favorites</string>
 
     <!-- Detail Activity -->
     <string name="movie_info">Movie Info</string>
     <string name="overview">Overview</string>
     <string name="trailers">Trailers:</string>
-    <string name="reviews">Reviews:</string>
+
     <string name="review_more_content">Tap to read the whole review</string>
 
     <string name="button_favorites">MARK AS FAVORITE</string>

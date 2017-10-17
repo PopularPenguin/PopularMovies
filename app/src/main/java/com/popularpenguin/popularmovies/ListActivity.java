@@ -33,7 +33,8 @@ public class ListActivity extends AppCompatActivity implements
 
     private final String INTENT_EXTRA_MOVIE = "movie";
 
-    public static final int LIST_LOADER_ID = 1;
+    public static final int NETWORK_LOADER_ID = 1;
+    public static final int FAVORITES_LOADER_ID = 2;
 
     private MovieAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -60,7 +61,7 @@ public class ListActivity extends AppCompatActivity implements
         }
         else {
             // if there is no saved state, initialize the loader
-            getSupportLoaderManager().initLoader(LIST_LOADER_ID, null, this);
+            getSupportLoaderManager().initLoader(NETWORK_LOADER_ID, null, this);
         }
     }
 
@@ -106,7 +107,7 @@ public class ListActivity extends AppCompatActivity implements
                 item.setChecked(true);
 
                 mPopularIsSelected = true;
-                getSupportLoaderManager().restartLoader(LIST_LOADER_ID, null, this);
+                getSupportLoaderManager().restartLoader(NETWORK_LOADER_ID, null, this);
 
                 break;
 
@@ -114,7 +115,14 @@ public class ListActivity extends AppCompatActivity implements
                 item.setChecked(true);
 
                 mPopularIsSelected = false;
-                getSupportLoaderManager().restartLoader(LIST_LOADER_ID, null, this);
+                getSupportLoaderManager().restartLoader(NETWORK_LOADER_ID, null, this);
+
+                break;
+
+            case R.id.action_sort_favorites:
+                item.setChecked(true);
+
+                // TODO: Implement the favorites menu item
 
                 break;
 
@@ -170,19 +178,34 @@ public class ListActivity extends AppCompatActivity implements
     /** Loader callbacks */
     @Override
     public Loader<ArrayList<Movie>> onCreateLoader(int id, final Bundle args) {
-        if (id == LIST_LOADER_ID) {
-            return new MovieLoader(this, mPopularIsSelected);
-        }
-        else {
-            throw new IllegalArgumentException("Invalid loader id");
+        switch (id) {
+            case NETWORK_LOADER_ID:
+                return new MovieLoader(this, mPopularIsSelected);
+
+            case FAVORITES_LOADER_ID:
+                // TODO: Implement and call the FavoritesLoader
+                throw new UnsupportedOperationException("Loader not yet implemented");
+
+            default:
+                throw new UnsupportedOperationException("Invalid loader id");
         }
     }
 
     @Override
     public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> result) {
         if (result == null || result.isEmpty()) {
-            Toast.makeText(ListActivity.this, R.string.con_error, Toast.LENGTH_SHORT).show();
-            return;
+            // Error loading data from network
+            if (loader.getId() == NETWORK_LOADER_ID) {
+                Toast.makeText(ListActivity.this, R.string.con_error,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Favorites database is empty
+            else {
+                Toast.makeText(ListActivity.this, R.string.fav_empty, Toast.LENGTH_SHORT)
+                        .show();
+                return;
+            }
         }
 
         mMovieList = result;

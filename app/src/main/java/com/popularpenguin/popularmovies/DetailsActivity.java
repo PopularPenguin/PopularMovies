@@ -16,8 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.popularpenguin.popularmovies.data.Movie;
-import com.popularpenguin.popularmovies.utils.ReviewsAdapter;
-import com.popularpenguin.popularmovies.utils.TrailersAdapter;
+import com.popularpenguin.popularmovies.utils.DetailsAdapter;
 import com.popularpenguin.popularmovies.utils.ReviewsLoader;
 import com.popularpenguin.popularmovies.utils.TrailersLoader;
 import com.squareup.picasso.Picasso;
@@ -27,8 +26,7 @@ import java.util.ArrayList;
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class DetailsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<ArrayList<String[]>>,
-        TrailersAdapter.DetailsAdapterOnClickHandler,
-        ReviewsAdapter.ReviewsAdapterOnClickHandler {
+        DetailsAdapter.DetailsAdapterOnClickHandler {
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
@@ -46,12 +44,9 @@ public class DetailsActivity extends AppCompatActivity implements
 
     private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
 
-    private TrailersAdapter mTrailersAdapter;
-    private ReviewsAdapter mReviewsAdapter;
-    private RecyclerView mTrailersRecyclerView;
-    private RecyclerView mReviewsRecyclerView;
-    private RecyclerView.LayoutManager mTrailersLayoutManager;
-    private RecyclerView.LayoutManager mReviewsLayoutManager;
+    private DetailsAdapter mDetailsAdapter;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     private Movie mMovie;
 
@@ -72,8 +67,7 @@ public class DetailsActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-        mTrailersRecyclerView = (RecyclerView) findViewById(R.id.rv_trailers);
-        mReviewsRecyclerView = (RecyclerView) findViewById(R.id.rv_reviews);
+        mRecyclerView = (RecyclerView) findViewById(R.id.rv_details);
 
         // TODO: Data binding?
         mTitleText = (TextView) findViewById(R.id.tv_title);
@@ -193,24 +187,24 @@ public class DetailsActivity extends AppCompatActivity implements
 
     /** Only call this after the data is loaded! */
     private void setUpRecyclerView() {
-        mTrailersAdapter = new TrailersAdapter(this, mMovie, this);
-        mReviewsAdapter = new ReviewsAdapter(this, mMovie, this);
-        mTrailersLayoutManager = new LinearLayoutManager(this);
-        mReviewsLayoutManager = new LinearLayoutManager(this);
+        mDetailsAdapter = new DetailsAdapter(this, mMovie, this);
+        mLayoutManager = new LinearLayoutManager(this);
 
-        mTrailersRecyclerView.setAdapter(mTrailersAdapter);
-        mTrailersRecyclerView.setLayoutManager(mTrailersLayoutManager);
-        mTrailersRecyclerView.setHasFixedSize(true);
-
-        mReviewsRecyclerView.setAdapter(mReviewsAdapter);
-        mReviewsRecyclerView.setLayoutManager(mReviewsLayoutManager);
-        mReviewsRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(mDetailsAdapter);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
     }
 
-    // TODO: Fix listener to work!
-    @Override
-    public void onClickTrailer(int position) { playTrailer(position); }
 
     @Override
-    public void onClickReview(int position) { openReviewInBrowser(position); }
+    public void onClickTrailer(int position, int itemType) {
+        switch (itemType) {
+            case DetailsAdapter.TRAILER_VIEW:
+                playTrailer(position);
+                break;
+
+            case DetailsAdapter.REVIEW_VIEW:
+                openReviewInBrowser(position);
+        }
+    }
 }
