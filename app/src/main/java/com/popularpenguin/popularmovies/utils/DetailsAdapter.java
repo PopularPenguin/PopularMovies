@@ -10,9 +10,6 @@ import android.widget.TextView;
 import com.popularpenguin.popularmovies.R;
 import com.popularpenguin.popularmovies.data.Movie;
 
-// TODO: Clean up
-// TODO: Split into 2? Or try some other implementation?
-
 /** This class is responsible for the list of trailers and reviews in DetailsActivity */
 public class DetailsAdapter extends RecyclerView.Adapter<DetailsAdapter.DetailsViewHolder> {
 

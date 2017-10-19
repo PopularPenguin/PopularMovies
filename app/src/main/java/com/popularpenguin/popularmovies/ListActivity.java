@@ -15,6 +15,7 @@ import android.view.Surface;
 import android.widget.Toast;
 
 import com.popularpenguin.popularmovies.data.Movie;
+import com.popularpenguin.popularmovies.utils.FavoritesLoader;
 import com.popularpenguin.popularmovies.utils.MovieAdapter;
 import com.popularpenguin.popularmovies.utils.MovieLoader;
 import com.popularpenguin.popularmovies.utils.NetworkUtils;
@@ -26,15 +27,16 @@ public class ListActivity extends AppCompatActivity implements
         MovieAdapter.MovieAdapterOnClickHandler,
         LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
 
+    // TODO: Fix issue where the favorites aren't loaded when back is pressed from DetailsActivity
     private static final String TAG = ListActivity.class.getSimpleName();
 
-    private static final String MOVIE_LIST_KEY = "movie_list";
-    private static final String POPULAR_KEY = "popular";
+    private static final String MOVIE_LIST_KEY = "popular_list";
+    private static final String MENU_INDEX_KEY = "menu_index";
 
     private final String INTENT_EXTRA_MOVIE = "movie";
 
-    public static final int NETWORK_LOADER_ID = 1;
-    public static final int FAVORITES_LOADER_ID = 2;
+    public static final int MOVIE_LOADER_ID = 0;
+    public static final int FAVORITES_LOADER_ID = 1;
 
     private MovieAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -42,7 +44,7 @@ public class ListActivity extends AppCompatActivity implements
 
     private ArrayList<Movie> mMovieList;
 
-    private boolean mPopularIsSelected = true;
+    private int mMenuItemIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +58,12 @@ public class ListActivity extends AppCompatActivity implements
         // Check if there is data in savedInstanceState, if not download the movie data
         if (savedInstanceState != null) {
             mMovieList = savedInstanceState.getParcelableArrayList(MOVIE_LIST_KEY);
-            mPopularIsSelected = savedInstanceState.getBoolean(POPULAR_KEY);
+            mMenuItemIndex = savedInstanceState.getInt(MENU_INDEX_KEY);
             setUpRecyclerView();
         }
         else {
             // if there is no saved state, initialize the loader
-            getSupportLoaderManager().initLoader(NETWORK_LOADER_ID, null, this);
+            getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
         }
     }
 
@@ -70,7 +72,7 @@ public class ListActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(MOVIE_LIST_KEY, mMovieList);
-        outState.putBoolean(POPULAR_KEY, mPopularIsSelected);
+        outState.putInt(MENU_INDEX_KEY, mMenuItemIndex);
         super.onSaveInstanceState(outState);
     }
 
@@ -80,13 +82,7 @@ public class ListActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.activity_list, menu);
 
         // set the menu item checked
-        // NOTE: If the menu order is changed, the indexes here will have to change too
-        if (mPopularIsSelected) {
-            menu.getItem(0).setChecked(true);
-        }
-        else {
-            menu.getItem(1).setChecked(true);
-        }
+        menu.getItem(mMenuItemIndex).setChecked(true);
 
         return true;
     }
@@ -106,23 +102,24 @@ public class ListActivity extends AppCompatActivity implements
             case R.id.action_sort_popular:
                 item.setChecked(true);
 
-                mPopularIsSelected = true;
-                getSupportLoaderManager().restartLoader(NETWORK_LOADER_ID, null, this);
+                mMenuItemIndex = 0;
+                getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
 
                 break;
 
             case R.id.action_sort_rating:
                 item.setChecked(true);
 
-                mPopularIsSelected = false;
-                getSupportLoaderManager().restartLoader(NETWORK_LOADER_ID, null, this);
+                mMenuItemIndex = 1;
+                getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
 
                 break;
 
             case R.id.action_sort_favorites:
                 item.setChecked(true);
 
-                // TODO: Implement the favorites menu item
+                mMenuItemIndex = 2;
+                getSupportLoaderManager().restartLoader(FAVORITES_LOADER_ID, null, this);
 
                 break;
 
@@ -179,12 +176,13 @@ public class ListActivity extends AppCompatActivity implements
     @Override
     public Loader<ArrayList<Movie>> onCreateLoader(int id, final Bundle args) {
         switch (id) {
-            case NETWORK_LOADER_ID:
-                return new MovieLoader(this, mPopularIsSelected);
+            case MOVIE_LOADER_ID:
+                boolean popularIsSelected = mMenuItemIndex == 0;
+
+                return new MovieLoader(this, popularIsSelected);
 
             case FAVORITES_LOADER_ID:
-                // TODO: Implement and call the FavoritesLoader
-                throw new UnsupportedOperationException("Loader not yet implemented");
+                return new FavoritesLoader(this);
 
             default:
                 throw new UnsupportedOperationException("Invalid loader id");
@@ -195,7 +193,7 @@ public class ListActivity extends AppCompatActivity implements
     public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> result) {
         if (result == null || result.isEmpty()) {
             // Error loading data from network
-            if (loader.getId() == NETWORK_LOADER_ID) {
+            if (loader.getId() == MOVIE_LOADER_ID) {
                 Toast.makeText(ListActivity.this, R.string.con_error,
                         Toast.LENGTH_SHORT).show();
                 return;

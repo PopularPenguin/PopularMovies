@@ -1,5 +1,6 @@
 package com.popularpenguin.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +9,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,6 +21,8 @@ import com.popularpenguin.popularmovies.utils.DetailsAdapter;
 import com.popularpenguin.popularmovies.utils.ReviewsLoader;
 import com.popularpenguin.popularmovies.utils.TrailersLoader;
 import com.squareup.picasso.Picasso;
+
+import com.popularpenguin.popularmovies.data.FavoritesContract.FavoritesEntry;
 
 import java.util.ArrayList;
 
@@ -59,7 +62,6 @@ public class DetailsActivity extends AppCompatActivity implements
 
     // Trailer views
     private ImageView mPlayImage;
-    // TODO: Remove this when you use the view holders
     private TextView mTrailerText;
 
     @Override
@@ -77,11 +79,20 @@ public class DetailsActivity extends AppCompatActivity implements
         mPosterImage = (ImageView) findViewById(R.id.iv_details_poster);
         mFavoritesButton = (Button) findViewById(R.id.btn_favorites);
 
-        // TODO: Add db functionality for button
+        // TODO: Add to db functionality for button, change color/text when movie is in db
         mFavoritesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(DetailsActivity.this, "Favorites clicked", Toast.LENGTH_SHORT).show();
+                ContentValues cv = new ContentValues();
+
+                cv.put(FavoritesEntry.COLUMN_MOVIE_ID, mMovie.getId());
+                cv.put(FavoritesEntry.COLUMN_MOVIE_TITLE, mMovie.getTitle());
+                cv.put(FavoritesEntry.COLUMN_MOVIE_OVERVIEW, mMovie.getOverview());
+                cv.put(FavoritesEntry.COLUMN_MOVIE_POSTER_PATH, mMovie.getPosterPath());
+                cv.put(FavoritesEntry.COLUMN_MOVIE_RATING, mMovie.getAverage());
+                cv.put(FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE, mMovie.getReleaseDate());
+
+                getContentResolver().insert(FavoritesEntry.CONTENT_URI, cv);
             }
         });
 
@@ -100,11 +111,23 @@ public class DetailsActivity extends AppCompatActivity implements
             Picasso.with(this).load(mMovie.getPosterPath()).into(mPosterImage);
 
             getSupportLoaderManager().initLoader(TRAILER_LOADER_ID, null, this);
+
+            Log.d(TAG, "movie id = " + mMovie.getId());
+            Log.d(TAG, "movie is favorite = " + mMovie.isFavorite());
+
+            if (mMovie.isFavorite()) {
+                Toast.makeText(this, "Favorite!", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(this, "Not a favorite", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     /** Stop up button from creating a new instance of the parent activity so it doesn't
      * fetch the data again */
+
+    /*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -112,7 +135,7 @@ public class DetailsActivity extends AppCompatActivity implements
         }
 
         return true;
-    }
+    } */
 
     /** Trailer loader callbacks */
     @Override

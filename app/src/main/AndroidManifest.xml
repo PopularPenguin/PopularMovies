@@ -29,6 +29,11 @@
             android:parentActivityName=".ListActivity"
             android:screenOrientation="fullSensor"/>
 
+        <provider
+            android:authorities="com.popularpenguin.popularmovies"
+            android:name="com.popularpenguin.popularmovies.data.FavoritesProvider"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

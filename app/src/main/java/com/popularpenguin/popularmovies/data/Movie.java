@@ -12,6 +12,8 @@ public class Movie implements Parcelable {
     private String mOverview;
     private double mAverage;
 
+    private boolean mFavorite;
+
     // Movie trailer data for the detail activity
     private String[] mTrailerKeys;
     private String[] mTrailerNames;
@@ -40,6 +42,8 @@ public class Movie implements Parcelable {
         mOverview = in.readString();
         mAverage = in.readDouble();
 
+        mFavorite = in.readInt() == 1;
+
         mTrailerKeys = in.createStringArray();
         mTrailerNames = in.createStringArray();
 
@@ -61,6 +65,8 @@ public class Movie implements Parcelable {
         dest.writeString(mReleaseDate);
         dest.writeString(mOverview);
         dest.writeDouble(mAverage);
+
+        dest.writeInt(mFavorite ? 1 : 0); // cause you can't just put a boolean into a parcel..
 
         dest.writeStringArray(mTrailerKeys);
         dest.writeStringArray(mTrailerNames);
@@ -118,4 +124,7 @@ public class Movie implements Parcelable {
 
     public String[] getReviewUrls() { return mReviewUrls; }
     public void setReviewUrls(String[] urls) { mReviewUrls = urls; }
+
+    public boolean isFavorite() { return mFavorite; }
+    public void setFavorite(boolean favorite) { mFavorite = favorite; }
 }

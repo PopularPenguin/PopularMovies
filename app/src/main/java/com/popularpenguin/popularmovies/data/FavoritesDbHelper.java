@@ -19,11 +19,11 @@ public class FavoritesDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         final String CREATE_TABLE = "CREATE TABLE " + FavoritesEntry.TABLE_NAME + " (" +
                 FavoritesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                FavoritesEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
+                FavoritesEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL UNIQUE, " +
                 FavoritesEntry.COLUMN_MOVIE_TITLE + " TEXT NOT NULL, " +
                 FavoritesEntry.COLUMN_MOVIE_OVERVIEW + " TEXT NOT NULL, " +
                 FavoritesEntry.COLUMN_MOVIE_POSTER_PATH + " TEXT NOT NULL, " +
-                FavoritesEntry.COLUMN_MOVIE_RATING + " TEXT NOT NULL, " +
+                FavoritesEntry.COLUMN_MOVIE_RATING + " REAL NOT NULL, " +
                 FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE + " TEXT NOT NULL" +
                 ");";
 
