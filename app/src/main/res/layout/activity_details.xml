@@ -76,7 +76,7 @@
         android:layout_marginTop="24dp"
         app:layout_constraintLeft_toLeftOf="@+id/tv_release_date"
         app:layout_constraintTop_toBottomOf="@+id/tv_rating"
-        android:text="@string/button_favorites"
+        tools:text="@string/btn_add_favorite"
         android:textSize="14sp"
         android:textColor="#FFFFFF"
         android:background="@android:color/holo_red_light"/>

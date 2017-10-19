@@ -27,7 +27,6 @@ public class ListActivity extends AppCompatActivity implements
         MovieAdapter.MovieAdapterOnClickHandler,
         LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
 
-    // TODO: Fix issue where the favorites aren't loaded when back is pressed from DetailsActivity
     private static final String TAG = ListActivity.class.getSimpleName();
 
     private static final String MOVIE_LIST_KEY = "popular_list";
@@ -73,6 +72,7 @@ public class ListActivity extends AppCompatActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(MOVIE_LIST_KEY, mMovieList);
         outState.putInt(MENU_INDEX_KEY, mMenuItemIndex);
+
         super.onSaveInstanceState(outState);
     }
 
@@ -202,7 +202,6 @@ public class ListActivity extends AppCompatActivity implements
             else {
                 Toast.makeText(ListActivity.this, R.string.fav_empty, Toast.LENGTH_SHORT)
                         .show();
-                return;
             }
         }
 

@@ -17,6 +17,7 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
     private static final String TAG = MovieLoader.class.getSimpleName();
 
     private Context ctx;
+    private ArrayList<Movie> mMovieList;
     private boolean mPopularSelected;
 
     public MovieLoader(Context ctx, boolean popularSelected) {
@@ -28,7 +29,12 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
     @Override
     protected void onStartLoading() {
-        forceLoad();
+        if (mMovieList != null) {
+            deliverResult(mMovieList);
+        }
+        else {
+            forceLoad();
+        }
     }
 
     @Override
@@ -70,6 +76,8 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
     @Override
     public void deliverResult(ArrayList<Movie> data) {
+        mMovieList = data;
+
         super.deliverResult(data);
     }
 }

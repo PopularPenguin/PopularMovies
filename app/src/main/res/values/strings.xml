@@ -12,13 +12,20 @@
     <string name="menu_rating">Sort by Rating</string>
     <string name="menu_favorites">Show Favorites</string>
 
-    <!-- Detail Activity -->
+    <!-- DetailsActivity menu -->
+    <string name="menu_share">Share</string>
+
+    <!-- DetailsActivity -->
     <string name="movie_info">Movie Info</string>
     <string name="overview">Overview</string>
     <string name="trailers">Trailers:</string>
 
     <string name="review_more_content">Tap to read the whole review</string>
 
-    <string name="button_favorites">MARK AS FAVORITE</string>
+    <string name="btn_add_favorite">MARK AS FAVORITE</string>
+    <string name="btn_remove_favorite">REMOVE FAVORITE</string>
+
+    <string name="favorite_added">Movie added to favorites</string>
+    <string name="favorite_removed">Movie removed from favorites</string>
 
 </resources>

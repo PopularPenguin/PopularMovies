@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -79,23 +80,6 @@ public class DetailsActivity extends AppCompatActivity implements
         mPosterImage = (ImageView) findViewById(R.id.iv_details_poster);
         mFavoritesButton = (Button) findViewById(R.id.btn_favorites);
 
-        // TODO: Add to db functionality for button, change color/text when movie is in db
-        mFavoritesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ContentValues cv = new ContentValues();
-
-                cv.put(FavoritesEntry.COLUMN_MOVIE_ID, mMovie.getId());
-                cv.put(FavoritesEntry.COLUMN_MOVIE_TITLE, mMovie.getTitle());
-                cv.put(FavoritesEntry.COLUMN_MOVIE_OVERVIEW, mMovie.getOverview());
-                cv.put(FavoritesEntry.COLUMN_MOVIE_POSTER_PATH, mMovie.getPosterPath());
-                cv.put(FavoritesEntry.COLUMN_MOVIE_RATING, mMovie.getAverage());
-                cv.put(FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE, mMovie.getReleaseDate());
-
-                getContentResolver().insert(FavoritesEntry.CONTENT_URI, cv);
-            }
-        });
-
         // TODO: Use a URI builder instead
 
         Intent intent = getIntent();
@@ -108,34 +92,39 @@ public class DetailsActivity extends AppCompatActivity implements
             mRating.setText(mMovie.getAverage());
             mOverview.setText(mMovie.getOverview());
 
+            setFavoritesButton(); // set the color and text of the favorites button
+
             Picasso.with(this).load(mMovie.getPosterPath()).into(mPosterImage);
 
             getSupportLoaderManager().initLoader(TRAILER_LOADER_ID, null, this);
-
-            Log.d(TAG, "movie id = " + mMovie.getId());
-            Log.d(TAG, "movie is favorite = " + mMovie.isFavorite());
-
-            if (mMovie.isFavorite()) {
-                Toast.makeText(this, "Favorite!", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Toast.makeText(this, "Not a favorite", Toast.LENGTH_SHORT).show();
-            }
         }
     }
 
     /** Stop up button from creating a new instance of the parent activity so it doesn't
      * fetch the data again */
-
-    /*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+
+        switch (itemId) {
+            case R.id.action_share:
+                // TODO: Implement sharing code here
+
+                break;
+
+            case android.R.id.home:
+                super.onBackPressed();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Invalid menu id");
+        }
         if (item.getItemId() == android.R.id.home) {
             super.onBackPressed();
         }
 
         return true;
-    } */
+    }
 
     /** Trailer loader callbacks */
     @Override
@@ -182,6 +171,60 @@ public class DetailsActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader<ArrayList<String[]>> loader) {
         // Not implemented
+    }
+
+    /** Set the color, text, and listener of the favorites button */
+    private void setFavoritesButton() {
+        if (!mMovie.isFavorite()) {
+            mFavoritesButton.setText(R.string.btn_add_favorite);
+        }
+        else {
+            mFavoritesButton.setText(R.string.btn_remove_favorite);
+        }
+
+        mFavoritesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mMovie.isFavorite()) {
+                    mMovie.setFavorite(true);
+
+                    ContentValues cv = new ContentValues();
+
+                    cv.put(FavoritesEntry.COLUMN_MOVIE_ID, mMovie.getId());
+                    cv.put(FavoritesEntry.COLUMN_MOVIE_TITLE, mMovie.getTitle());
+                    cv.put(FavoritesEntry.COLUMN_MOVIE_OVERVIEW, mMovie.getOverview());
+                    cv.put(FavoritesEntry.COLUMN_MOVIE_POSTER_PATH, mMovie.getPosterPath());
+                    cv.put(FavoritesEntry.COLUMN_MOVIE_RATING, mMovie.getAverage());
+                    cv.put(FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE, mMovie.getReleaseDate());
+
+                    getContentResolver().insert(FavoritesEntry.CONTENT_URI, cv);
+
+                    getContentResolver().notifyChange(FavoritesEntry.CONTENT_URI, null);
+
+                    mFavoritesButton.setText(R.string.btn_remove_favorite);
+
+                    Toast.makeText(DetailsActivity.this, R.string.favorite_added,
+                            Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    mMovie.setFavorite(false);
+
+                    String idString = String.valueOf(mMovie.getId());
+
+                    Uri uri = FavoritesEntry.CONTENT_URI.buildUpon().appendPath(idString).build();
+
+                    getContentResolver().delete(uri, FavoritesEntry.COLUMN_MOVIE_ID + "=?",
+                            new String[] { idString });
+
+                    getContentResolver().notifyChange(FavoritesEntry.CONTENT_URI, null);
+
+                    mFavoritesButton.setText(R.string.btn_add_favorite);
+
+                    Toast.makeText(DetailsActivity.this, R.string.favorite_removed,
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void playTrailer(int position) {

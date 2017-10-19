@@ -117,7 +117,8 @@ public class FavoritesProvider extends ContentProvider {
         switch (match) {
             case MOVIE_WITH_ID:
                 String id = uri.getPathSegments().get(1);
-                moviesDeleted = db.delete(FavoritesEntry.TABLE_NAME, "_id=?", new String[]{ id });
+                moviesDeleted = db.delete(FavoritesEntry.TABLE_NAME,
+                        FavoritesEntry.COLUMN_MOVIE_ID + "=?", new String[]{ id });
 
                 break;
 
