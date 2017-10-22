@@ -24,7 +24,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<DetailsAdapter.DetailsV
     private final DetailsAdapterOnClickHandler mClickHandler;
 
     public interface DetailsAdapterOnClickHandler {
-        void onClickTrailer(int position, int itemType);
+        void onClick(int position, int itemType);
     }
 
     private final Context ctx;
@@ -136,8 +136,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<DetailsAdapter.DetailsV
 
         @Override
         public void onClick(View v) {
-
-            mClickHandler.onClickTrailer(itemPosition, itemType);
+            mClickHandler.onClick(itemPosition, itemType);
         }
     }
 }

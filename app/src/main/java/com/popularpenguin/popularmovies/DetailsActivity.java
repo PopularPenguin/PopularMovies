@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -62,6 +61,8 @@ public class DetailsActivity extends AppCompatActivity implements
     private TextView mOverview;
     private ImageView mPosterImage;
     private Button mFavoritesButton;
+    private View mDivider;
+    private TextView mTrailerLabel;
 
     // Trailer views
     private ImageView mPlayImage;
@@ -76,15 +77,14 @@ public class DetailsActivity extends AppCompatActivity implements
 
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_details);
 
-        // TODO: Data binding?
         mTitleText = (TextView) findViewById(R.id.tv_title);
         mReleaseDateText = (TextView) findViewById(R.id.tv_release_date);
         mRating = (TextView) findViewById(R.id.tv_rating);
         mOverview = (TextView) findViewById(R.id.tv_overview);
         mPosterImage = (ImageView) findViewById(R.id.iv_details_poster);
         mFavoritesButton = (Button) findViewById(R.id.btn_favorites);
-
-        // TODO: Use a URI builder instead
+        mDivider = findViewById(R.id.divider_trailers);
+        mTrailerLabel = (TextView) findViewById(R.id.tv_trailers);
 
         Intent intent = getIntent();
 
@@ -119,6 +119,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
         switch (itemId) {
             case R.id.action_share:
+                // TODO: Expand this into a separate class so I can use twitter and facebook?
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TEXT, "Movie to share");
@@ -159,8 +160,16 @@ public class DetailsActivity extends AppCompatActivity implements
     @Override
     public void onLoadFinished(Loader<ArrayList<String[]>> loader, ArrayList<String[]> data) {
 
-        // check if the data is empty
-        if (data.isEmpty()) return;
+        // check if the data is empty, if so remove the trailer label and divider and return
+        if (data.isEmpty()) {
+            // we are offline, remove trailer and review info since we can't fetch it
+            mDivider.setVisibility(View.GONE);
+            mTrailerLabel.setVisibility(View.GONE);
+
+            return;
+        }
+
+
 
         switch (loader.getId()) {
             case TRAILER_LOADER_ID:
@@ -176,8 +185,6 @@ public class DetailsActivity extends AppCompatActivity implements
                 mMovie.setReviewContent(data.get(REVIEW_CONTENT_INDEX));
                 mMovie.setReviewUrls(data.get(REVIEW_URLS_INDEX));
 
-                //Toast.makeText(this, String.valueOf(mMovie.getReviewAuthors().length), Toast.LENGTH_SHORT).show();
-
                 setUpRecyclerView();
 
                 break;
@@ -192,7 +199,7 @@ public class DetailsActivity extends AppCompatActivity implements
         // Not implemented
     }
 
-    /** Set the color, text, and listener of the favorites button */
+    /** Set the text and listener of the favorites button */
     private void setFavoritesButton() {
         if (!mMovie.isFavorite()) {
             mFavoritesButton.setText(R.string.btn_add_favorite);
@@ -205,6 +212,7 @@ public class DetailsActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 if (!mMovie.isFavorite()) {
+                    // if not a favorite, put the movie info into the db
                     mMovie.setFavorite(true);
 
                     ContentValues cv = new ContentValues();
@@ -226,6 +234,7 @@ public class DetailsActivity extends AppCompatActivity implements
                             Toast.LENGTH_SHORT).show();
                 }
                 else {
+                    // remove the movie from the favorites db
                     mMovie.setFavorite(false);
 
                     String idString = String.valueOf(mMovie.getId());
@@ -246,6 +255,10 @@ public class DetailsActivity extends AppCompatActivity implements
         });
     }
 
+    /** play the trailer
+     *
+     * @param position the array position in the movie's trailer key data
+     */
     private void playTrailer(int position) {
         String key = mMovie.getTrailerKeys()[position];
 
@@ -259,6 +272,10 @@ public class DetailsActivity extends AppCompatActivity implements
         }
     }
 
+    /** Open a review in the web browser
+     *
+     * @param position the array position in the movie's review url data
+     */
     private void openReviewInBrowser(int position) {
         String url = mMovie.getReviewUrls()[position];
 
@@ -281,8 +298,13 @@ public class DetailsActivity extends AppCompatActivity implements
     }
 
 
+    /** Click a trailer or review
+     *
+     * @param position the adapter position
+     * @param itemType the type (trailer or review) of the view at the adapter position
+     */
     @Override
-    public void onClickTrailer(int position, int itemType) {
+    public void onClick(int position, int itemType) {
         switch (itemType) {
             case DetailsAdapter.TRAILER_VIEW:
                 playTrailer(position);

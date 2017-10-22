@@ -22,10 +22,6 @@ import com.popularpenguin.popularmovies.utils.NetworkUtils;
 
 import java.util.ArrayList;
 
-// TODO: Fix app so the it loads the correct movie list when pressing back from DetailsActivity
-// there is a conflict in starting both loaders with forceLoad()
-// reinitialize the loader at the proper menu position, ignore the other
-
 @SuppressWarnings("FieldCanBeLocal")
 public class ListActivity extends AppCompatActivity implements
         MovieAdapter.MovieAdapterOnClickHandler,
@@ -33,13 +29,16 @@ public class ListActivity extends AppCompatActivity implements
 
     private static final String TAG = ListActivity.class.getSimpleName();
 
+    public static final int MENU_POPULAR = 0;
+    public static final int MENU_RATING = 1;
+    public static final int MENU_FAVORITE = 2;
+
     private static final String MOVIE_LIST_KEY = "popular_list";
     private static final String MENU_INDEX_KEY = "menu_index";
 
     private final String INTENT_EXTRA_MOVIE = "movie";
 
     public static final int MOVIE_LOADER_ID = 0;
-    public static final int FAVORITES_LOADER_ID = 1;
 
     private MovieAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -106,7 +105,7 @@ public class ListActivity extends AppCompatActivity implements
             case R.id.action_sort_popular:
                 item.setChecked(true);
 
-                mMenuItemIndex = 0;
+                mMenuItemIndex = MENU_POPULAR;
                 getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
 
                 break;
@@ -114,7 +113,7 @@ public class ListActivity extends AppCompatActivity implements
             case R.id.action_sort_rating:
                 item.setChecked(true);
 
-                mMenuItemIndex = 1;
+                mMenuItemIndex = MENU_RATING;
                 getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
 
                 break;
@@ -122,8 +121,8 @@ public class ListActivity extends AppCompatActivity implements
             case R.id.action_sort_favorites:
                 item.setChecked(true);
 
-                mMenuItemIndex = 2;
-                getSupportLoaderManager().restartLoader(FAVORITES_LOADER_ID, null, this);
+                mMenuItemIndex = MENU_FAVORITE;
+                getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
 
                 break;
 
@@ -172,7 +171,6 @@ public class ListActivity extends AppCompatActivity implements
     public void onClick(Movie movie) {
         Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra(INTENT_EXTRA_MOVIE, movie);
-        Toast.makeText(this, "Favorite? " + movie.isFavorite(), Toast.LENGTH_SHORT).show();
 
         startActivity(intent);
     }
@@ -180,25 +178,15 @@ public class ListActivity extends AppCompatActivity implements
     /** Loader callbacks */
     @Override
     public Loader<ArrayList<Movie>> onCreateLoader(int id, final Bundle args) {
-        switch (id) {
-            case MOVIE_LOADER_ID:
-                boolean popularIsSelected = mMenuItemIndex == 0;
 
-                return new MovieLoader(this, popularIsSelected);
-
-            case FAVORITES_LOADER_ID:
-                return new FavoritesLoader(this);
-
-            default:
-                throw new UnsupportedOperationException("Invalid loader id");
-        }
+        return new MovieLoader(this, mMenuItemIndex);
     }
 
     @Override
     public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> result) {
         if (result == null || result.isEmpty()) {
             // Error loading data from network
-            if (loader.getId() == MOVIE_LOADER_ID) {
+            if (loader.getId() == MOVIE_LOADER_ID && mMenuItemIndex != MENU_FAVORITE) {
                 Toast.makeText(ListActivity.this, R.string.con_error,
                         Toast.LENGTH_SHORT).show();
                 return;

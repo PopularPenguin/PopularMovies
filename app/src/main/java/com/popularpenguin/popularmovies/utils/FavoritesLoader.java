@@ -15,7 +15,6 @@ public class FavoritesLoader extends AsyncTaskLoader<ArrayList<Movie>> {
     private static final String TAG = FavoritesLoader.class.getSimpleName();
 
     private Context ctx;
-    private ArrayList<Movie> mMovieList;
 
     public FavoritesLoader(Context ctx) {
         super(ctx);
