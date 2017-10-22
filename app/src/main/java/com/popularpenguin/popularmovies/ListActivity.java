@@ -22,6 +22,10 @@ import com.popularpenguin.popularmovies.utils.NetworkUtils;
 
 import java.util.ArrayList;
 
+// TODO: Fix app so the it loads the correct movie list when pressing back from DetailsActivity
+// there is a conflict in starting both loaders with forceLoad()
+// reinitialize the loader at the proper menu position, ignore the other
+
 @SuppressWarnings("FieldCanBeLocal")
 public class ListActivity extends AppCompatActivity implements
         MovieAdapter.MovieAdapterOnClickHandler,
@@ -90,12 +94,12 @@ public class ListActivity extends AppCompatActivity implements
     /** Menu options to sort by popularity or rating, fetch new data when changing options */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (!NetworkUtils.isConnected(this)) {
+        int itemId = item.getItemId();
+
+        if (!NetworkUtils.isConnected(this) && itemId != R.id.action_sort_favorites) {
             Toast.makeText(this, R.string.con_error, Toast.LENGTH_SHORT).show();
             return false;
         }
-
-        int itemId = item.getItemId();
 
         switch (itemId) {
 
@@ -168,6 +172,7 @@ public class ListActivity extends AppCompatActivity implements
     public void onClick(Movie movie) {
         Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra(INTENT_EXTRA_MOVIE, movie);
+        Toast.makeText(this, "Favorite? " + movie.isFavorite(), Toast.LENGTH_SHORT).show();
 
         startActivity(intent);
     }

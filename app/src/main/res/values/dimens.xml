@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="details_margin">16dp</dimen>
+
+    <dimen name="details_trailer_text_margin">24dp</dimen>
+    <dimen name="details_trailer_margin">48dp</dimen>
+</resources>

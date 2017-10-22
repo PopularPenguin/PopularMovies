@@ -17,8 +17,8 @@
         android:id="@+id/tv_review_author"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginLeft="@dimen/details_margin"
+        android:layout_marginStart="@dimen/details_margin"
         android:layout_marginTop="24dp"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="16sp"
@@ -29,8 +29,8 @@
         android:id="@+id/tv_review_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="@dimen/details_margin"
+        android:layout_marginRight="@dimen/details_margin"
         android:layout_marginTop="16dp"
         tools:text="Add a review here..."/>
 

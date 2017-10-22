@@ -6,10 +6,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.ShareActionProvider;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -65,6 +67,8 @@ public class DetailsActivity extends AppCompatActivity implements
     private ImageView mPlayImage;
     private TextView mTrailerText;
 
+    private ShareActionProvider mShareActionProvider;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +104,13 @@ public class DetailsActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_details, menu);
+
+        return true;
+    }
+
     /** Stop up button from creating a new instance of the parent activity so it doesn't
      * fetch the data again */
     @Override
@@ -108,7 +119,11 @@ public class DetailsActivity extends AppCompatActivity implements
 
         switch (itemId) {
             case R.id.action_share:
-                // TODO: Implement sharing code here
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, "Movie to share");
+
+                startActivity(Intent.createChooser(intent, mMovie.getTitle()));
 
                 break;
 
@@ -143,6 +158,10 @@ public class DetailsActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<ArrayList<String[]>> loader, ArrayList<String[]> data) {
+
+        // check if the data is empty
+        if (data.isEmpty()) return;
+
         switch (loader.getId()) {
             case TRAILER_LOADER_ID:
                 mMovie.setTrailerKeys(data.get(TRAILER_KEYS_INDEX));

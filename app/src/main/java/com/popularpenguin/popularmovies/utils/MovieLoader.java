@@ -3,7 +3,6 @@ package com.popularpenguin.popularmovies.utils;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
 
 import com.popularpenguin.popularmovies.data.FavoritesContract.FavoritesEntry;
 import com.popularpenguin.popularmovies.data.Movie;
@@ -29,12 +28,7 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
     @Override
     protected void onStartLoading() {
-        if (mMovieList != null) {
-            deliverResult(mMovieList);
-        }
-        else {
-            forceLoad();
-        }
+        forceLoad();
     }
 
     @Override
@@ -49,13 +43,11 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
             cursor.moveToFirst();
 
-            Log.d(TAG, "Cursor count = " + cursor.getCount());
-
             // build the ids array
             for (int i = 0; i < cursor.getCount(); i++) {
                 ids[i] = cursor.getInt(cursor.getColumnIndex(FavoritesEntry.COLUMN_MOVIE_ID));
                 cursor.moveToNext();
-                Log.d(TAG, "ids[" + i + "] = " + ids[i]);
+
             }
 
             // match favorite ids to movie ids
@@ -63,8 +55,7 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
                 for (int id : ids) {
                     if (movie.getId() == id) {
                         movie.setFavorite(true);
-                        Log.d(TAG, "Favorite set for " + movie.getTitle() + "(" +
-                        movie.isFavorite() + ")");
+
                         break;
                     }
                 }
@@ -72,12 +63,5 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
         }
 
         return movies;
-    }
-
-    @Override
-    public void deliverResult(ArrayList<Movie> data) {
-        mMovieList = data;
-
-        super.deliverResult(data);
     }
 }
