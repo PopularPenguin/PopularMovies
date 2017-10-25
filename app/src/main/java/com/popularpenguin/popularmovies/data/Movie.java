@@ -127,4 +127,9 @@ public class Movie implements Parcelable {
 
     public boolean isFavorite() { return mFavorite; }
     public void setFavorite(boolean favorite) { mFavorite = favorite; }
+
+    // get the text to share
+    public String getText() {
+        return mTitle + " (" + mReleaseDate.substring(0, 4) + ")\n\n" + mOverview;
+    }
 }

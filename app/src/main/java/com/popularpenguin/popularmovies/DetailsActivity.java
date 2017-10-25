@@ -119,12 +119,11 @@ public class DetailsActivity extends AppCompatActivity implements
 
         switch (itemId) {
             case R.id.action_share:
-                // TODO: Expand this into a separate class so I can use twitter and facebook?
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, "Movie to share");
+                intent.putExtra(Intent.EXTRA_TEXT, mMovie.getText());
 
-                startActivity(Intent.createChooser(intent, mMovie.getTitle()));
+                startActivity(Intent.createChooser(intent, "Share with"));
 
                 break;
 
