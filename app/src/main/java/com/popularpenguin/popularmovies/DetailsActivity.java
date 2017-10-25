@@ -123,7 +123,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TEXT, mMovie.getText());
 
-                startActivity(Intent.createChooser(intent, "Share with"));
+                startActivity(Intent.createChooser(intent, getString(R.string.share_text)));
 
                 break;
 
@@ -167,8 +167,6 @@ public class DetailsActivity extends AppCompatActivity implements
 
             return;
         }
-
-
 
         switch (loader.getId()) {
             case TRAILER_LOADER_ID:

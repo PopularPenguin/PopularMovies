@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -10,23 +11,22 @@
         android:id="@+id/iv_play_trailer"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        android:layout_gravity="center_vertical"
         android:layout_marginLeft="@dimen/details_trailer_text_margin"
         android:layout_marginStart="@dimen/details_trailer_text_margin"
         android:layout_marginTop="8dp"
         android:scaleType="fitCenter"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_trailers"
         app:srcCompat="@drawable/img_play"/>
 
     <TextView
         android:id="@+id/tv_trailer_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:layout_marginLeft="@dimen/details_trailer_margin"
         android:layout_marginStart="@dimen/details_trailer_margin"
-        app:layout_constraintTop_toTopOf="@+id/iv_play_trailer"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_play_trailer"
-        app:layout_constraintLeft_toRightOf="@+id/iv_play_trailer"
+        android:layout_marginRight="@dimen/details_trailer_text_margin"
+        android:layout_marginEnd="@dimen/details_trailer_text_margin"
         tools:text="Trailer 1"/>
 
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

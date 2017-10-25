@@ -15,6 +15,9 @@
     <!-- DetailsActivity menu -->
     <string name="menu_share">Share</string>
 
+    <!-- The text of the share chooser -->
+    <string name="share_text">Share with</string>
+
     <!-- DetailsActivity -->
     <string name="movie_info">Movie Info</string>
     <string name="overview">Overview</string>
