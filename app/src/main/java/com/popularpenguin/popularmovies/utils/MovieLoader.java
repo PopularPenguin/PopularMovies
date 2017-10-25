@@ -16,7 +16,6 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
     private static final String TAG = MovieLoader.class.getSimpleName();
 
-    private Context ctx;
     private ArrayList<Movie> mMovieList;
     private boolean mPopularSelected;
     private int mMenuPosition;
@@ -24,7 +23,6 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
     public MovieLoader(Context ctx, int position) {
         super(ctx);
 
-        this.ctx = ctx;
         mMenuPosition = position;
         mPopularSelected = position == 0;
     }
@@ -56,10 +54,12 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
     }
 
     private ArrayList<Movie> loadMoviesFromNetwork() {
+        Context ctx = getContext();
         ArrayList<Movie> movies = getMovies(ctx, mPopularSelected);
 
         Cursor cursor = ctx.getContentResolver().query(FavoritesEntry.CONTENT_URI,
-                new String[] {FavoritesEntry.COLUMN_MOVIE_ID}, null, null, null, null);
+                new String[] {FavoritesEntry.COLUMN_MOVIE_ID}, null, null,
+                null, null);
 
         if (!(cursor == null || cursor.getCount() == 0)) {
             int[] ids = new int[cursor.getCount()]; // the ids of all the favorite movies
@@ -85,11 +85,15 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
             }
         }
 
+        if (cursor != null) {
+            cursor.close();
+        }
+
         return movies;
     }
 
     private ArrayList<Movie> loadMoviesFromFavorites() {
-        Cursor cursor  = ctx.getContentResolver().query(FavoritesEntry.CONTENT_URI,
+        Cursor cursor  = getContext().getContentResolver().query(FavoritesEntry.CONTENT_URI,
                 null, null, null, null);
 
         if (cursor == null || cursor.getCount() == 0) {
@@ -112,6 +116,8 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
             movie.setFavorite(true);
             movies.add(movie);
         } while (cursor.moveToNext());
+
+        cursor.close();
 
         return movies;
     }

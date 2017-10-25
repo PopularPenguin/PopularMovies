@@ -14,12 +14,8 @@ public class FavoritesLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
     private static final String TAG = FavoritesLoader.class.getSimpleName();
 
-    private Context ctx;
-
     public FavoritesLoader(Context ctx) {
         super(ctx);
-
-        this.ctx = ctx;
     }
 
     @Override
@@ -30,7 +26,7 @@ public class FavoritesLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
     @Override
     public ArrayList<Movie> loadInBackground() {
-        Cursor cursor  = ctx.getContentResolver().query(FavoritesEntry.CONTENT_URI,
+        Cursor cursor  = getContext().getContentResolver().query(FavoritesEntry.CONTENT_URI,
                 null, null, null, null);
 
         if (cursor == null || cursor.getCount() == 0) {
@@ -53,6 +49,8 @@ public class FavoritesLoader extends AsyncTaskLoader<ArrayList<Movie>> {
             movie.setFavorite(true);
             movies.add(movie);
         } while (cursor.moveToNext());
+
+        cursor.close();
 
         return movies;
     }
