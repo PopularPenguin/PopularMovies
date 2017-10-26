@@ -11,13 +11,11 @@ public class TrailersLoader extends AsyncTaskLoader<ArrayList<String[]>> {
 
     private static final String TAG = TrailersLoader.class.getSimpleName();
 
-    private Context mContext;
     private int mId;
 
     public TrailersLoader(Context context, int id) {
         super(context);
 
-        mContext = context;
         mId = id;
     }
 
@@ -28,7 +26,7 @@ public class TrailersLoader extends AsyncTaskLoader<ArrayList<String[]>> {
 
     @Override
     public ArrayList<String[]> loadInBackground() {
-        return getTrailers(mContext, mId);
+        return getTrailers(getContext(), mId);
     }
 
     @Override

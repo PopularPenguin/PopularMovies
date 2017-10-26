@@ -121,7 +121,9 @@ public class DetailsActivity extends AppCompatActivity implements
             case R.id.action_share:
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, mMovie.getText());
+                intent.putExtra(Intent.EXTRA_SUBJECT, mMovie.getTitle());
+                // send the url for the first trailer
+                intent.putExtra(Intent.EXTRA_TEXT, YOUTUBE_BASE_URL + mMovie.getTrailerKeys()[0]);
 
                 startActivity(Intent.createChooser(intent, getString(R.string.share_text)));
 

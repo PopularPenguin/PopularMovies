@@ -11,13 +11,11 @@ public class ReviewsLoader extends AsyncTaskLoader<ArrayList<String[]>> {
 
     private static final String TAG = MovieLoader.class.getSimpleName();
 
-    private Context mContext;
     private int mId;
 
     public ReviewsLoader(Context context, int id) {
         super(context);
 
-        mContext = context;
         mId = id;
     }
 
@@ -28,7 +26,7 @@ public class ReviewsLoader extends AsyncTaskLoader<ArrayList<String[]>> {
 
     @Override
     public ArrayList<String[]> loadInBackground() {
-        return getReviews(mContext, mId);
+        return getReviews(getContext(), mId);
     }
 
     @Override
